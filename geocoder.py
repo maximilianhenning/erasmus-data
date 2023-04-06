@@ -29,18 +29,34 @@ geocode_df = geocode_df.loc[geocode_df["Country Code"].isin(["PT", "ES", "AD", "
                                                              "GR", "TR", "SI", "HR", "BA", "MK",
                                                              "RS", "AL", "MT"
                                                              ])]
-geocode_df = geocode_df[["Name", "Coordinates"]]
+geocode_df = geocode_df[["Name", "Coordinates", "Population", "Alternate Names"]]
 geocode_df["name_code"] = geocode_df["Name"].str.lower().apply(unidecode)
+geocode_df["Alternate Names"] = geocode_df["Alternate Names"].str.lower()
 
 city_counter = 0
-coded_counter = 0
+success_counter = 0
 for city in geocoded_dict.keys():
     city_counter += 1
-    if city in geocode_df["name_code"].tolist():
-        coded_counter += 1
-        geocoded_dict[city].append(geocode_df.loc[geocode_df["name_code"] == city]["Coordinates"].values[0].split(", ")[0])
-        geocoded_dict[city].append(geocode_df.loc[geocode_df["name_code"] == city]["Coordinates"].values[0].split(", ")[1])
-        print("Done:", str((city_counter / len(geocoded_dict.keys()))*100)[:5] + "% - Coded:", str((coded_counter / len(geocoded_dict.keys()))*100)[:5] + "%")
+    # Check in primary name
+    if city in geocode_df["name_code"].to_list():
+        # Check for potential misattributions to smaller cities (Roma), find those coordinates
+        if geocode_df.loc[geocode_df["name_code"] == city]["Population"].values[0] < 5000:
+            if geocode_df["Alternate Names"].str.contains("," + str(city) + ",", na = False).any():
+                geocoded_dict[city].append(geocode_df.loc[geocode_df["Alternate Names"].str.contains("," + str(city) + ",", na = False)].sort_values("Population")["Coordinates"].values[0].split(", ")[0])
+                geocoded_dict[city].append(geocode_df.loc[geocode_df["Alternate Names"].str.contains("," + str(city) + ",", na = False)].sort_values("Population")["Coordinates"].values[0].split(", ")[1])
+                success_counter += 1
+        # Main coordinate finder
+        if len(geocoded_dict[city]) == 2:
+                geocoded_dict[city].append(geocode_df.loc[geocode_df["name_code"] == city]["Coordinates"].values[0].split(", ")[0])
+                geocoded_dict[city].append(geocode_df.loc[geocode_df["name_code"] == city]["Coordinates"].values[0].split(", ")[1])
+                success_counter += 1
+    # Otherwise check in alternate names
+    elif geocode_df["Alternate Names"].str.contains("," + str(city) + ",", na = False).any():
+        geocoded_dict[city].append(geocode_df.loc[geocode_df["Alternate Names"].str.contains("," + str(city) + ",", na = False)].sort_values("Population")["Coordinates"].values[0].split(", ")[0])
+        geocoded_dict[city].append(geocode_df.loc[geocode_df["Alternate Names"].str.contains("," + str(city) + ",", na = False)].sort_values("Population")["Coordinates"].values[0].split(", ")[1])
+        success_counter += 1
+    print("Done:", str((city_counter / len(geocoded_dict.keys()))*100)[:5] + "% - Success:", str((success_counter / len(geocoded_dict.keys()))*100)[:5] + "%")
 geocoded_df = pd.DataFrame.from_dict(geocoded_dict, orient = "index")
-geocoded_df = geocoded_df.reset_index().drop(columns = "index").rename(columns = {0: "name_code", 1: "name_full", 2: "lat", 3: "lon"})
-pd.DataFrame.to_csv(geocoded_df, path.join(dir, "geocoded.csv"), encoding = "utf-8", sep = ";")
+geocoded_df = geocoded_df.reset_index().drop(columns = [0, "index"]).reset_index().rename(columns = {"index": "id", 1: "name", 2: "lat", 3: "lon"})
+geocoded_df = geocoded_df.loc[geocoded_df["lat"].notna()]
+pd.DataFrame.to_csv(geocoded_df, path.join(dir, "geocoded.csv"), encoding = "utf-8", sep = ";", index = False)

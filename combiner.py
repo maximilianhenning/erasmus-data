@@ -19,4 +19,4 @@ for year in target_years:
     df["target"] = df["target"].astype(int)
     df.rename(columns = {"home": "origin", "target": "dest", 0: "weight"}, inplace = True)
     print(df.head())
-    df.to_csv(path.join(dir + "/edges/" + str(year) + ".csv"), sep = ";")
+    df.to_csv(path.join(dir + "/edges/" + str(year) + ".csv"), sep = ";", index = False)

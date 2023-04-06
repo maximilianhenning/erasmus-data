@@ -1,0 +1,1 @@
+Get your data from https://data.europa.eu/data/datasets?query=erasmus%20mobility%20statistics&locale=en&publisher=http%3A%2F%2Fpublications.europa.eu%2Fresource%2Fauthority%2Fcorporate-body%2FEAC&page=1&limit=10 (convert to CSV if necessary)
