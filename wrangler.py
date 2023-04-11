@@ -96,7 +96,8 @@ def code_city_lists(city_list, feature, geocoded_df):
 # Load directory and initial dataframes
 dir = path.dirname(__file__)
 institutions_df = pd.read_csv(path.join(dir, "institutions.csv"), sep = ";", encoding = "utf-8")
-geocoded_df = pd.read_csv(path.join(dir, "geocoded.csv"), sep = ";", encoding = "utf-8")
+geocoded_short_df = pd.read_csv(path.join(dir, "geocoded_short.csv"), sep = ";", encoding = "utf-8")
+geocoded_long_df = pd.read_csv(path.join(dir, "geocoded_long.csv"), sep = ";", encoding = "utf-8")
 
 # Glob files in data and done folders to see what years still need to be done
 data_years = []
@@ -115,8 +116,12 @@ target_years = sorted(list(set(data_years) - set(done_years)))
 for year in target_years:
     df, home_column, target_column, granularity = read_df(year)
     home_city_list, target_city_list = create_city_lists(df, home_column, target_column, granularity)
-    home_coded_list = code_city_lists(home_city_list, "home", geocoded_df)
-    target_coded_list = code_city_lists(target_city_list, "target", geocoded_df)
+    if granularity == "institution":
+        home_coded_list = code_city_lists(home_city_list, "home", geocoded_short_df)
+        target_coded_list = code_city_lists(target_city_list, "target", geocoded_short_df)
+    else:
+        home_coded_list = code_city_lists(home_city_list, "target", geocoded_long_df)
+        target_coded_list = code_city_lists(target_city_list, "target", geocoded_long_df)
     lists = [home_coded_list, target_coded_list]
     df = pd.DataFrame(lists).transpose()
     df.columns = ["home", "target"]
