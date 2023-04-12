@@ -34,10 +34,10 @@ def city_lookup(institution_list, institution_city_dict, year, feature, len_over
     city_list = []
     for institution in institution_list:
         city_counter += 1
-        if institution_city_dict[institution] == institution_city_dict[institution]:
+        if institution in institution_city_dict.keys():
             city_list.append(institution_city_dict[institution])
         else:
-            city_list.append(str(institution).split(" ")[-1])
+            city_list.append(str(institution_city_dict).split(" ")[-1])
         print(year, feature, "city list created:", str(city_counter / len_overall * 100)[:5], "%")
     return city_list
 
@@ -55,7 +55,7 @@ def create_city_lists(df, home_column, target_column, granularity):
             try:
                 institution_city_dict[institution] = institutions_df.loc[institutions_df["Code"] == institution]["City"].values[0]
             except:
-                institution_city_dict[institution] = float("nan")
+                pass
         # Look up all cities in dictionary created above
         home_city_list = city_lookup(home_institution_list, institution_city_dict, year, "home", len_overall)
         target_city_list = city_lookup(target_institution_list, institution_city_dict, year, "target", len_overall)
@@ -74,19 +74,19 @@ def code_city_lists(city_list, feature, geocoded_df):
     city_coded_dict = {}
     for city in city_list:
         city_counter += 1
-        # Check if city_raw is nan
-        if city == city:
-            city = re.sub(r"\(.*?\)", "", city)
-            city = re.sub(r"\s\d+", "", city)
-            city = city.lower().strip().replace("  ", " ")
-            city = unidecode(city)
+        # City string cleaning
+        city = str(city)
+        city = re.sub(r"\(.*?\)", "", city)
+        city = re.sub(r"\s\d+", "", city)
+        city = city.lower().strip().replace("  ", " ")
+        city = unidecode(city)
         # Use a new dict to speed up the process
         if city not in city_coded_dict.keys():
             try:
                 city_coded_dict[city] = geocoded_df.loc[geocoded_df["name_code"] == city]["id"].tolist()[0]
             except:
-                city_coded_dict[city] = float("nan")
-        if str(city_coded_dict[city]) != "nan":
+                city_coded_dict[city] = "nan"
+        if city_coded_dict[city] != "nan":
             success_counter += 1
         city_coded_list.append(city_coded_dict[city])
         print(year, feature, "cities cleaned & id'd:", str(city_counter / len_overall * 100)[:5], 
