@@ -34,7 +34,10 @@ def city_lookup(institution_list, institution_city_dict, year, feature, len_over
     city_list = []
     for institution in institution_list:
         city_counter += 1
-        city_list.append(institution_city_dict[institution])
+        if institution_city_dict[institution] == institution_city_dict[institution]:
+            city_list.append(institution_city_dict[institution])
+        else:
+            city_list.append(str(institution).split(" ")[-1])
         print(year, feature, "city list created:", str(city_counter / len_overall * 100)[:5], "%")
     return city_list
 
@@ -47,17 +50,12 @@ def create_city_lists(df, home_column, target_column, granularity):
         institution_list = home_institution_list + target_institution_list
         institution_list = list(set(institution_list))
         # Monitoring
-        success_counter = 0
-        fail_counter = 0
         len_overall = len(home_institution_list)
         for institution in institution_list:
             try:
                 institution_city_dict[institution] = institutions_df.loc[institutions_df["Code"] == institution]["City"].values[0]
-                success_counter += 1
             except:
                 institution_city_dict[institution] = float("nan")
-                fail_counter += 1
-        print(year, "city lookup success:", str(success_counter / (success_counter + fail_counter) * 100)[:5], "%")
         # Look up all cities in dictionary created above
         home_city_list = city_lookup(home_institution_list, institution_city_dict, year, "home", len_overall)
         target_city_list = city_lookup(target_institution_list, institution_city_dict, year, "target", len_overall)
@@ -74,11 +72,11 @@ def code_city_lists(city_list, feature, geocoded_df):
     success_counter = 0
     city_coded_list = []
     city_coded_dict = {}
-    for city_raw in city_list:
+    for city in city_list:
         city_counter += 1
         # Check if city_raw is nan
-        if city_raw == city_raw:
-            city = re.sub(r"\(.*?\)", "", city_raw)
+        if city == city:
+            city = re.sub(r"\(.*?\)", "", city)
             city = re.sub(r"\s\d+", "", city)
             city = city.lower().strip().replace("  ", " ")
             city = unidecode(city)
@@ -97,7 +95,7 @@ def code_city_lists(city_list, feature, geocoded_df):
 
 # Load directory and initial dataframes
 dir = path.dirname(__file__)
-institutions_df = pd.read_csv(path.join(dir, "institutions.csv"), sep = ";", encoding = "utf-8")
+institutions_df = pd.read_csv(path.join(dir, "geocoding/institutions.csv"), sep = ";", encoding = "utf-8")
 geocoded_df = pd.read_csv(path.join(dir, "geocoding/geocoded.csv"), sep = ";", encoding = "utf-8")
 
 # Glob files in data and done folders to see what years still need to be done
@@ -122,6 +120,6 @@ for year in target_years:
     lists = [home_coded_list, target_coded_list]
     df = pd.DataFrame(lists).transpose()
     df.columns = ["home", "target"]
-    if not path.exists(path.join(dir + "/edges_raw")):
-        makedirs(path.join(dir + "/edges_raw"))
-    df.to_csv(path.join(dir + "/edges_raw/" + str(year) + ".csv"), sep = ";", encoding = "utf-8")
+    if not path.exists(path.join(dir, "edges_raw")):
+        makedirs(path.join(dir, "edges_raw"))
+    df.to_csv(path.join(dir, "edges_raw", str(year) + ".csv"), sep = ";", encoding = "utf-8")

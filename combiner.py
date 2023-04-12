@@ -3,7 +3,7 @@ from os import path, makedirs
 from glob import glob
 
 dir = path.dirname(__file__)
-geocoded_df = pd.read_csv(path.join(dir, "geocoded.csv"), sep = ";", encoding = "utf-8")
+geocoded_df = pd.read_csv(path.join(dir, "geocoding/geocoded.csv"), sep = ";", encoding = "utf-8")
 if not path.exists(path.join(dir + "/edges")):
     makedirs(path.join(dir + "/edges"))
 if not path.exists(path.join(dir + "/output")):
@@ -19,7 +19,7 @@ for file in edges_raw_folder:
     df["home"] = df["home"].astype(int)
     df["target"] = df["target"].astype(int)
     df.rename(columns = {"home": "origin", "target": "dest", 0: "count"}, inplace = True)
-    df.to_csv(path.join(dir + "/edges/" + str(year) + ".csv"), sep = ";", index = False)
+    df.to_csv(path.join(dir, "edges", str(year) + ".csv"), sep = ";", index = False)
 
 # Combine all edges
 edges_folder = glob(path.join(dir, "edges/*"))
@@ -35,6 +35,6 @@ final_df.to_csv(path.join(dir, "output/flows.csv"), sep = ";", index = False)
 origin_list = final_df["origin"].tolist()
 dest_list = final_df["dest"].tolist()
 all_cities_list = list(set(origin_list + dest_list))
-geocoded_df = pd.read_csv(path.join(dir + "/geocoded.csv"), sep = ";", encoding = "utf-8")
+geocoded_df = pd.read_csv(path.join(dir, "geocoding/geocoded.csv"), sep = ";", encoding = "utf-8")
 geocoded_df = geocoded_df.loc[geocoded_df["id"].isin(all_cities_list)].drop(columns = "name_code")
 geocoded_df.to_csv(path.join(dir, "output/locations.csv"), sep = ";", index = False)
