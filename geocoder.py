@@ -31,17 +31,14 @@ def geocoded_dict_creator(cities_list):
         city = str(city_raw)
         city = re.sub(r"\[.+?\]|\(.+?\)|\{.+?\}", "", city)
         city = re.sub(r"[^a-zA-Z\s]+", "", city)
-        city = city.lower()
-        city = city.strip()
-        city = city.replace("  ", " ")
+        city = city.lower().strip().replace("  ", " ")
         city = unidecode(city)
         city_split = [token for token in city.split(" ") if not token.isdigit()]
         city = " ".join(city_split)
         if len(city) > 2 and city not in geocoded_dict.keys():
             geocoded_dict[city] = [city_raw]
     return geocoded_dict
-geocoded_short_dict = geocoded_dict_creator(cities_raw_short)
-geocoded_long_dict = geocoded_dict_creator(cities_raw_long)
+geocoded_dict = geocoded_dict_creator(cities_raw_short)
 
 geocode_df = geocode_df.loc[geocode_df["Country Code"].isin(["PT", "ES", "FR", "IT", "RS", "MT",
                                                              "BE", "LU", "NL", "GB", "IE", "LI",
@@ -86,7 +83,5 @@ def geocoded_df_creator(geocoded_dict):
     geocoded_df = geocoded_df.reset_index().reset_index().rename(columns = {"level_0": "id", "index": "name_code", 0: "name", 1: "lat", 2: "lon",})
     geocoded_df = geocoded_df.loc[geocoded_df["lat"].notna()]
     return geocoded_df
-geocoded_short_df = geocoded_df_creator(geocoded_short_dict)
-pd.DataFrame.to_csv(geocoded_short_df, path.join(dir, "geocoded_short.csv"), encoding = "utf-8", sep = ";", index = False)
-geocoded_long_df = geocoded_df_creator(geocoded_long_dict)
-pd.DataFrame.to_csv(geocoded_long_df, path.join(dir, "geocoded_long.csv"), encoding = "utf-8", sep = ";", index = False)
+geocoded_df = geocoded_df_creator(geocoded_dict)
+pd.DataFrame.to_csv(geocoded_df, path.join(dir, "geocoded.csv"), encoding = "utf-8", sep = ";", index = False)

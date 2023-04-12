@@ -68,12 +68,11 @@ def create_city_lists(df, home_column, target_column, granularity):
 
 # Clean city names, look up id in geocoded df
 def code_city_lists(city_list, feature, geocoded_df):
-    len_overall = len(city_list)
-    city_coded_list = []
     # Monitoring
+    len_overall = len(city_list)
     city_counter = 0
     success_counter = 0
-    fail_counter = 0
+    city_coded_list = []
     for city_raw in city_list:
         city_counter += 1
         # Check if city_raw is nan
@@ -87,17 +86,15 @@ def code_city_lists(city_list, feature, geocoded_df):
             success_counter += 1
         except:
             number = float("nan")
-            fail_counter += 1
         city_coded_list.append(number)
         print(year, feature, "cities cleaned & id'd:", str(city_counter / len_overall * 100)[:5], 
-            "% - Success:", str(success_counter / (success_counter + fail_counter) * 100)[:5], "%")
+            "% - Success:", str(success_counter / city_counter * 100)[:5], "%")
     return city_coded_list
 
 # Load directory and initial dataframes
 dir = path.dirname(__file__)
 institutions_df = pd.read_csv(path.join(dir, "institutions.csv"), sep = ";", encoding = "utf-8")
-geocoded_short_df = pd.read_csv(path.join(dir, "geocoded_short.csv"), sep = ";", encoding = "utf-8")
-geocoded_long_df = pd.read_csv(path.join(dir, "geocoded_long.csv"), sep = ";", encoding = "utf-8")
+geocoded_df = pd.read_csv(path.join(dir, "geocoded.csv"), sep = ";", encoding = "utf-8")
 
 # Glob files in data and done folders to see what years still need to be done
 data_years = []
@@ -116,12 +113,8 @@ target_years = sorted(list(set(data_years) - set(done_years)))
 for year in target_years:
     df, home_column, target_column, granularity = read_df(year)
     home_city_list, target_city_list = create_city_lists(df, home_column, target_column, granularity)
-    if granularity == "institution":
-        home_coded_list = code_city_lists(home_city_list, "home", geocoded_short_df)
-        target_coded_list = code_city_lists(target_city_list, "target", geocoded_short_df)
-    else:
-        home_coded_list = code_city_lists(home_city_list, "target", geocoded_long_df)
-        target_coded_list = code_city_lists(target_city_list, "target", geocoded_long_df)
+    home_coded_list = code_city_lists(home_city_list, "home", geocoded_df)
+    target_coded_list = code_city_lists(target_city_list, "target", geocoded_df)
     lists = [home_coded_list, target_coded_list]
     df = pd.DataFrame(lists).transpose()
     df.columns = ["home", "target"]
