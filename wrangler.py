@@ -73,6 +73,7 @@ def code_city_lists(city_list, feature, geocoded_df):
     city_counter = 0
     success_counter = 0
     city_coded_list = []
+    city_coded_dict = {}
     for city_raw in city_list:
         city_counter += 1
         # Check if city_raw is nan
@@ -81,12 +82,15 @@ def code_city_lists(city_list, feature, geocoded_df):
             city = re.sub(r"\s\d+", "", city)
             city = city.lower().strip().replace("  ", " ")
             city = unidecode(city)
-        try:
-            number = geocoded_df.loc[geocoded_df["name_code"] == city]["id"].tolist()[0]
+        # Use a new dict to speed up the process
+        if city not in city_coded_dict.keys():
+            try:
+                city_coded_dict[city] = geocoded_df.loc[geocoded_df["name_code"] == city]["id"].tolist()[0]
+            except:
+                city_coded_dict[city] = float("nan")
+        if str(city_coded_dict[city]) != "nan":
             success_counter += 1
-        except:
-            number = float("nan")
-        city_coded_list.append(number)
+        city_coded_list.append(city_coded_dict[city])
         print(year, feature, "cities cleaned & id'd:", str(city_counter / len_overall * 100)[:5], 
             "% - Success:", str(success_counter / city_counter * 100)[:5], "%")
     return city_coded_list
@@ -94,7 +98,7 @@ def code_city_lists(city_list, feature, geocoded_df):
 # Load directory and initial dataframes
 dir = path.dirname(__file__)
 institutions_df = pd.read_csv(path.join(dir, "institutions.csv"), sep = ";", encoding = "utf-8")
-geocoded_df = pd.read_csv(path.join(dir, "geocoded.csv"), sep = ";", encoding = "utf-8")
+geocoded_df = pd.read_csv(path.join(dir, "geocoding/geocoded.csv"), sep = ";", encoding = "utf-8")
 
 # Glob files in data and done folders to see what years still need to be done
 data_years = []

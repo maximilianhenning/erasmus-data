@@ -5,8 +5,8 @@ import re
 from unidecode import unidecode
 
 dir = path.dirname(__file__)
-geocode_df = pd.read_csv(path.join(dir, "geocode.csv"), sep = ";", encoding = "utf-8")
-institutions_df = pd.read_csv(path.join(dir, "institutions.csv"), sep = ";", encoding = "utf-8")
+geocode_df = pd.read_csv(path.join(dir, "geocoding/geocode.csv"), sep = ";", encoding = "utf-8")
+institutions_df = pd.read_csv(path.join(dir, "geocoding/institutions.csv"), sep = ";", encoding = "utf-8")
 
 cities_raw_short = institutions_df["City"].tolist()
 cities_raw_long_initial = institutions_df["City"].tolist()
@@ -84,4 +84,4 @@ def geocoded_df_creator(geocoded_dict):
     geocoded_df = geocoded_df.loc[geocoded_df["lat"].notna()]
     return geocoded_df
 geocoded_df = geocoded_df_creator(geocoded_dict)
-pd.DataFrame.to_csv(geocoded_df, path.join(dir, "geocoded.csv"), encoding = "utf-8", sep = ";", index = False)
+pd.DataFrame.to_csv(geocoded_df, path.join(dir, "geocoding/geocoded.csv"), encoding = "utf-8", sep = ";", index = False)
