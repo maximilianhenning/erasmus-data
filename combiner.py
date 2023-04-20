@@ -39,5 +39,3 @@ all_cities_list = list(set(origin_list + dest_list))
 geocoded_df = pd.read_csv(path.join(dir, "geocoding/geocoded.csv"), sep = ";", encoding = "utf-8")
 geocoded_df = geocoded_df.loc[geocoded_df["id"].isin(all_cities_list)].drop(columns = "name_code")
 geocoded_df.to_csv(path.join(dir, "output/locations.csv"), sep = ";", index = False)
-
-# Drop flows if cities are not geocoded
