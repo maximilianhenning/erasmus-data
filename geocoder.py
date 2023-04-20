@@ -8,9 +8,8 @@ dir = path.dirname(__file__)
 geocode_df = pd.read_csv(path.join(dir, "geocoding/geocode.csv"), sep = ";", encoding = "utf-8")
 institutions_df = pd.read_csv(path.join(dir, "geocoding/institutions.csv"), sep = ";", encoding = "utf-8")
 
-cities_raw_short = institutions_df["City"].tolist()
-cities_raw_long_initial = institutions_df["City"].tolist()
-cities_raw_long_expand = []
+cities_raw_initial = institutions_df["City"].tolist()
+cities_raw_expand = []
 data_results = glob(path.join(dir, "data/*"))
 for file in data_results:
     year = int(file.split("\\")[-1].split(".")[0])
@@ -18,12 +17,12 @@ for file in data_results:
         df = pd.read_csv(file, sep = ";", encoding = "utf-8")
         sending_list = df["Sending City"].tolist()
         for city in sending_list:
-            cities_raw_long_expand.append(city)
+            cities_raw_expand.append(city)
         receiving_list = df["Receiving City"].tolist()
         for city in receiving_list:
-            cities_raw_long_expand.append(city)
-cities_raw_long_expand = list(set(cities_raw_long_expand))
-cities_raw_long = cities_raw_long_initial + cities_raw_long_expand
+            cities_raw_expand.append(city)
+cities_raw_expand = list(set(cities_raw_expand))
+cities_raw = cities_raw_initial + cities_raw_expand
 
 def geocoded_dict_creator(cities_list):
     geocoded_dict = {}
@@ -38,7 +37,7 @@ def geocoded_dict_creator(cities_list):
         if len(city) > 2 and city not in geocoded_dict.keys():
             geocoded_dict[city] = [city_raw]
     return geocoded_dict
-geocoded_dict = geocoded_dict_creator(cities_raw_short)
+geocoded_dict = geocoded_dict_creator(cities_raw)
 
 geocode_df = geocode_df.loc[geocode_df["Country Code"].isin(["PT", "ES", "FR", "IT", "RS", "MT",
                                                              "BE", "LU", "NL", "GB", "IE", "LI",

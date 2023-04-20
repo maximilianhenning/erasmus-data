@@ -23,12 +23,13 @@ for file in edges_raw_folder:
 
 # Combine all edges
 edges_folder = glob(path.join(dir, "edges/*"))
-final_df = float("nan")
 df_list = []
 for file in edges_folder:
     df = pd.read_csv(file, sep = ";", encoding = "utf-8")
     df_list.append(df)
-final_df = pd.concat(df_list)
+unfiltered_df = pd.concat(df_list)
+# Eliminate flows with only one person
+final_df = unfiltered_df.loc[unfiltered_df["count"] > 1]
 final_df.to_csv(path.join(dir, "output/flows.csv"), sep = ";", index = False)
 
 # Filter geocoded only to cities in dataset
@@ -38,3 +39,5 @@ all_cities_list = list(set(origin_list + dest_list))
 geocoded_df = pd.read_csv(path.join(dir, "geocoding/geocoded.csv"), sep = ";", encoding = "utf-8")
 geocoded_df = geocoded_df.loc[geocoded_df["id"].isin(all_cities_list)].drop(columns = "name_code")
 geocoded_df.to_csv(path.join(dir, "output/locations.csv"), sep = ";", index = False)
+
+# Drop flows if cities are not geocoded
