@@ -27,18 +27,23 @@ def read_df(year):
         home_column = "Sending City"
         target_column = "Receiving City"
         granularity = "city"
+    df = df.loc[df[home_column].notna()]
+    df = df.loc[df[target_column].notna()]
+    if not path.exists(path.join(dir, "data_notna")):
+        makedirs(path.join(dir, "data_notna"))
+    df.to_csv(path.join(dir, "data_notna", str(year) + ".csv"), sep = ";", encoding = "utf-8")
     return df, home_column, target_column, granularity
 
 def city_lookup(institution_list, institution_city_dict, year, feature, len_overall):
-    city_counter = 0
+    institution_counter = 0
     city_list = []
     for institution in institution_list:
-        city_counter += 1
+        institution_counter += 1
         if institution in institution_city_dict.keys():
             city_list.append(institution_city_dict[institution])
         else:
-            city_list.append(str(institution_city_dict).split(" ")[-1])
-        print(year, feature, "city list created:", str(city_counter / len_overall * 100)[:5], "%")
+            city_list.append(str(institution).split(" ")[-1])
+        print(year, feature, "city list created:", str(institution_counter / len_overall * 100)[:5], "%")
     return city_list
 
 def create_city_lists(df, home_column, target_column, granularity):
@@ -53,7 +58,11 @@ def create_city_lists(df, home_column, target_column, granularity):
         len_overall = len(home_institution_list)
         for institution in institution_list:
             try:
-                institution_city_dict[institution] = institutions_df.loc[institutions_df["Code"] == institution]["City"].values[0]
+                try:
+                    institution_city_dict[institution] = institutions_df.loc[institutions_df["Code"] == institution]["City"].values[0]
+                except:
+                    institution = re.sub(r"\s*\d+", "", institution)
+                    institution_city_dict[institution] = institutions_df.loc[institutions_df["Code"].str.contains(institution)]["City"].values[0]
             except:
                 pass
         # Look up all cities in dictionary created above
@@ -77,7 +86,7 @@ def code_city_lists(city_list, feature, geocoded_df):
         # City string cleaning
         city = str(city)
         city = re.sub(r"\(.*?\)", "", city)
-        city = re.sub(r"\s\d+", "", city)
+        city = re.sub(r"\s*\d+", "", city)
         city = city.lower().strip().replace("  ", " ")
         city = unidecode(city)
         # Use a new dict to speed up the process
