@@ -22,3 +22,5 @@ How to use:
 6. Run wrangler.py
 7. Run combiner.py
 8. Enjoy your data!
+
+For more information, see my [blog post](https://zarasophos.net/erasmus/).
