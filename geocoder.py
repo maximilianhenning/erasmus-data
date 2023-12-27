@@ -5,8 +5,8 @@ import re
 from unidecode import unidecode
 
 dir = path.dirname(__file__)
-geocode_df = pd.read_csv(path.join(dir, "geocoding/geocode.csv"), sep = ";", encoding = "utf-8")
-institutions_df = pd.read_csv(path.join(dir, "geocoding/institutions.csv"), sep = ";", encoding = "utf-8")
+geocode_df = pd.read_csv(path.join(dir, "geocoding", "geocode.csv"), sep = ";", encoding = "utf-8")
+institutions_df = pd.read_csv(path.join(dir, "geocoding", "institutions.csv"), sep = ";", encoding = "utf-8")
 
 cities_raw_initial = institutions_df["City"].tolist()
 cities_raw_expand = []
@@ -14,7 +14,10 @@ data_results = glob(path.join(dir, "data/*"))
 for file in data_results:
     year = int(file.split("\\")[-1].split(".")[0])
     if year > 2013:
-        df = pd.read_csv(file, sep = ";", encoding = "utf-8")
+        if year > 2019:
+            df = pd.read_csv(file, sep = ";", encoding = "latin-1")
+        else:
+            df = pd.read_csv(file, sep = ";", encoding = "utf-8")
         sending_list = df["Sending City"].tolist()
         for city in sending_list:
             cities_raw_expand.append(city)
@@ -46,7 +49,7 @@ geocode_df = geocode_df.loc[geocode_df["Country Code"].isin(["PT", "ES", "FR", "
                                                              "CZ", "SK", "AT", "HU", "RO", "BG",
                                                              "GR", "TR", "SI", "HR", "MK",
                                                              ])]
-geocode_df = geocode_df[["Name", "Coordinates", "Population", "Alternate Names"]]
+geocode_df = geocode_df[["Name", "Coordinates", "Population", "Alternate Names", "Country Code"]]
 geocode_df["name_code"] = geocode_df["Name"].str.lower().apply(unidecode)
 geocode_df["Alternate Names"] = geocode_df["Alternate Names"].str.lower()
 
@@ -64,23 +67,29 @@ def geocoded_df_creator(geocoded_dict):
                     coordinates = geocode_df.loc[geocode_df["Alternate Names"].str.contains(search_string, na = False)].sort_values("Population")["Coordinates"].values[0].split(", ")
                     geocoded_dict[city].append(coordinates[0])
                     geocoded_dict[city].append(coordinates[1])
+                    country_code = geocode_df.loc[geocode_df["Alternate Names"].str.contains(search_string, na = False)].sort_values("Population")["Country Code"].values[0]
+                    geocoded_dict[city].append(country_code)
                     success_counter += 1
             # Main coordinate finder
             if len(geocoded_dict[city]) == 1:
                     coordinates = geocode_df.loc[geocode_df["name_code"] == city]["Coordinates"].values[0].split(", ")
                     geocoded_dict[city].append(coordinates[0])
                     geocoded_dict[city].append(coordinates[1])
+                    country_code = geocode_df.loc[geocode_df["name_code"] == city]["Country Code"].values[0]
+                    geocoded_dict[city].append(country_code)
                     success_counter += 1
         # Otherwise check in alternate names
         elif geocode_df["Alternate Names"].str.contains(search_string, na = False).any():
             coordinates = geocode_df.loc[geocode_df["Alternate Names"].str.contains(search_string, na = False)].sort_values("Population")["Coordinates"].values[0].split(", ")
             geocoded_dict[city].append(coordinates[0])
             geocoded_dict[city].append(coordinates[1])
+            country_code = geocode_df.loc[geocode_df["Alternate Names"].str.contains(search_string, na = False)].sort_values("Population")["Country Code"].values[0]
+            geocoded_dict[city].append(country_code)
             success_counter += 1
         print("Done:", str((city_counter / len(geocoded_dict.keys()))*100)[:5], "% - Success:", str((success_counter / city_counter)*100)[:5], "%")
     geocoded_df = pd.DataFrame.from_dict(geocoded_dict, orient = "index")
-    geocoded_df = geocoded_df.reset_index().reset_index().rename(columns = {"level_0": "id", "index": "name_code", 0: "name", 1: "lat", 2: "lon",})
+    geocoded_df = geocoded_df.reset_index().reset_index().rename(columns = {"level_0": "id", "index": "name_code", 0: "name", 1: "lat", 2: "lon", 3: "country_code"})
     geocoded_df = geocoded_df.loc[geocoded_df["lat"].notna()]
     return geocoded_df
 geocoded_df = geocoded_df_creator(geocoded_dict)
-pd.DataFrame.to_csv(geocoded_df, path.join(dir, "geocoding/geocoded.csv"), encoding = "utf-8", sep = ";", index = False)
+pd.DataFrame.to_csv(geocoded_df, path.join(dir, "geocoding", "geocoded.csv"), encoding = "utf-8", sep = ";", index = False)

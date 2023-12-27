@@ -6,12 +6,12 @@ from unidecode import unidecode
 
 def read_df(year):
     year = int(year)
-    if year == 2012:
+    if year in [2012, 2020]:
         target_encoding = "latin-1"
     else:
         target_encoding = "utf-8"
-    df = pd.read_csv(str(dir + "/data/" + str(year) + ".csv"), sep = ";", encoding = target_encoding)
-    if year in [2008, 2009, 2010, 2011]:
+    df = pd.read_csv(path.join(dir, "data", str(year) + ".csv"), sep = ";", encoding = target_encoding)
+    if year < 2012:
         home_column = "HOMEINSTITUTION"
         target_column = "HOSTINSTITUTION"
         granularity = "institution"
@@ -23,7 +23,7 @@ def read_df(year):
         home_column = "SendingPartnerErasmusID"
         target_column = "HostingPartnerErasmusID"
         granularity = "institution"
-    elif year in [2014, 2015, 2016, 2017, 2018, 2019, 2020]:
+    elif year > 2013:
         home_column = "Sending City"
         target_column = "Receiving City"
         granularity = "city"
