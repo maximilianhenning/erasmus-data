@@ -23,7 +23,7 @@ def read_df(year):
         home_column = "SendingPartnerErasmusID"
         target_column = "HostingPartnerErasmusID"
         granularity = "institution"
-    elif year in [2014, 2015, 2016, 2017, 2018, 2019]:
+    elif year in [2014, 2015, 2016, 2017, 2018, 2019, 2020]:
         home_column = "Sending City"
         target_column = "Receiving City"
         granularity = "city"
