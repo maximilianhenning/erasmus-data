@@ -9,8 +9,8 @@ Dependencies:
 Data:
 
 1. Erasmus exchanges: [European Commission](https://data.europa.eu/data/datasets?query=erasmus%20mobility%20statistics&locale=en&publisher=http%3A%2F%2Fpublications.europa.eu%2Fresource%2Fauthority%2Fcorporate-body%2FEAC&page=1&limit=10)
-2. Erasmus institutions: [European Commission](https://erasmus-plus.ec.europa.eu/document/higher-education-institutions-holding-an-eche-2021-2027)
-3. Geocoding: [Geonames](https://data.opendatasoft.com/explore/dataset/geonames-all-cities-with-a-population-1000%40public/table/?disjunctive.cou_name_en&sort=name)
+2. Geocoding: [Geonames](https://data.opendatasoft.com/explore/dataset/geonames-all-cities-with-a-population-1000%40public/table/?disjunctive.cou_name_en&sort=name)
+3. Erasmus institutions: [European Commission](https://erasmus-plus.ec.europa.eu/document/higher-education-institutions-holding-an-eche-2021-2027)
 
 How to use:
 
