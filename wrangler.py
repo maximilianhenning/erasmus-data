@@ -59,10 +59,10 @@ def create_city_lists(df, home_column, target_column, granularity):
         for institution in institution_list:
             try:
                 try:
-                    institution_city_dict[institution] = institutions_df.loc[institutions_df["Code"] == institution]["City"].values[0]
+                    institution_city_dict[institution] = institutions_df.loc[institutions_df["Erasmus Code"] == institution]["City"].values[0]
                 except:
                     institution = re.sub(r"\s*\d+", "", institution)
-                    institution_city_dict[institution] = institutions_df.loc[institutions_df["Code"].str.contains(institution)]["City"].values[0]
+                    institution_city_dict[institution] = institutions_df.loc[institutions_df["Erasmus Code"].str.contains(institution)]["City"].values[0]
             except:
                 pass
         # Look up all cities in dictionary created above
@@ -104,8 +104,8 @@ def code_city_lists(city_list, feature, geocoded_df):
 
 # Load directory and initial dataframes
 dir = path.dirname(__file__)
-institutions_df = pd.read_csv(path.join(dir, "geocoding/institutions.csv"), sep = ";", encoding = "utf-8")
-geocoded_df = pd.read_csv(path.join(dir, "geocoding/geocoded.csv"), sep = ";", encoding = "utf-8")
+institutions_df = pd.read_csv(path.join(dir, "geocoding", "institutions.csv"), sep = ";", encoding = "utf-8")
+geocoded_df = pd.read_csv(path.join(dir, "geocoding", "geocoded.csv"), sep = ";", encoding = "utf-8")
 
 # Glob files in data and done folders to see what years still need to be done
 data_years = []
