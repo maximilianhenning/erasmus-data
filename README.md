@@ -17,7 +17,7 @@ Data:
 - [2013](https://web.archive.org/web/20181002153523/https://data.europa.eu/euodp/repository/ec/dg-eac/erasmus-data-2013-2014/Student_Mobility_2013-14.xlsx)
 - [2014-2020](https://data.europa.eu/data/datasets/erasmus-mobility-statistics-2014-2020)
 2. Geocoding: [Geonames](https://data.opendatasoft.com/explore/dataset/geonames-all-cities-with-a-population-1000%40public/table/?disjunctive.cou_name_en&sort=name)
-3. Erasmus institutions: [European Commission](https://erasmus-plus.ec.europa.eu/document/higher-education-institutions-holding-an-eche-2021-2027)
+3. Erasmus institutions: [European Commission](https://web.archive.org/web/20211027055147if_/https://erasmus-plus.ec.europa.eu/sites/default/files/2021-09/accredited-heis-erasmus-2021-2027_en.xlsx)
 
 How to use:
 

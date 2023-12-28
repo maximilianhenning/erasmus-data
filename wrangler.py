@@ -109,12 +109,12 @@ geocoded_df = pd.read_csv(path.join(dir, "geocoding/geocoded.csv"), sep = ";", e
 
 # Glob files in data and done folders to see what years still need to be done
 data_years = []
-data_folder = glob(path.join(dir, "data/*"))
+data_folder = glob(path.join(dir, "data", "*"))
 for file in data_folder:
     year = file.split("data\\")[1].split(".")[0]
     data_years.append(year)
 done_years = []
-done_folder = glob(path.join(dir, "edges_raw/*"))
+done_folder = glob(path.join(dir, "edges_raw", "*"))
 for file in done_folder:
     year = file.split("edges_raw\\")[1].split(".")[0]
     done_years.append(year)
