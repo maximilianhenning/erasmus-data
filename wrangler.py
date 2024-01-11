@@ -11,6 +11,7 @@ def read_df(year):
     else:
         target_encoding = "utf-8"
     df = pd.read_csv(path.join(dir, "data", str(year) + ".csv"), sep = ";", encoding = target_encoding)
+    # Exclude NA
     if year < 2012:
         home_column = "HOMEINSTITUTION"
         target_column = "HOSTINSTITUTION"
@@ -29,6 +30,11 @@ def read_df(year):
         granularity = "city"
     df = df.loc[df[home_column].notna()]
     df = df.loc[df[target_column].notna()]
+    # Exclude non-students
+    if year > 2014:
+        category_column = "Activity (mob)"
+        category_value = "Student mobility for studies between Programme Countries"
+        df = df.loc[df[category_column] == category_value]
     if not path.exists(path.join(dir, "data_notna")):
         makedirs(path.join(dir, "data_notna"))
     df.to_csv(path.join(dir, "data_notna", str(year) + ".csv"), sep = ";", encoding = "utf-8")

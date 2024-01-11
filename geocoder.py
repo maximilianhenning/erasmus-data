@@ -10,7 +10,7 @@ institutions_df = pd.read_csv(path.join(dir, "geocoding", "institutions.csv"), s
 
 cities_raw_initial = institutions_df["City"].tolist()
 cities_raw_expand = []
-data_results = glob(path.join(dir, "data/*"))
+data_results = glob(path.join(dir, "data", "*"))
 for file in data_results:
     year = int(file.split("\\")[-1].split(".")[0])
     if year > 2013:
@@ -50,8 +50,9 @@ geocode_df = geocode_df.loc[geocode_df["Country Code"].isin(["PT", "ES", "FR", "
                                                              "GR", "TR", "SI", "HR", "MK",
                                                              ])]
 geocode_df = geocode_df[["Name", "Coordinates", "Population", "Alternate Names", "Country Code"]]
+geocode_df = geocode_df.sort_values("Population", ascending = False)
 geocode_df["name_code"] = geocode_df["Name"].str.lower().apply(unidecode)
-geocode_df["Alternate Names"] = geocode_df["Alternate Names"].str.lower()
+geocode_df["alternate_name_codes"] = geocode_df["Alternate Names"].apply(lambda x: unidecode(str(x).lower()) if pd.notna(x) else x)
 
 def geocoded_df_creator(geocoded_dict):
     city_counter = 0
@@ -63,27 +64,27 @@ def geocoded_df_creator(geocoded_dict):
         if city in geocode_df["name_code"].to_list():
             # Check for potential misattributions to smaller cities (Roma), find those coordinates
             if geocode_df.loc[geocode_df["name_code"] == city]["Population"].values[0] < 5000:
-                if geocode_df["Alternate Names"].str.contains(search_string, na = False).any():
-                    coordinates = geocode_df.loc[geocode_df["Alternate Names"].str.contains(search_string, na = False)].sort_values("Population")["Coordinates"].values[0].split(", ")
+                if geocode_df["alternate_name_codes"].str.contains(search_string, na = False).any():
+                    coordinates = geocode_df.loc[geocode_df["alternate_name_codes"].str.contains(search_string, na = False)]["Coordinates"].values[0].split(", ")
                     geocoded_dict[city].append(coordinates[0])
                     geocoded_dict[city].append(coordinates[1])
-                    country_code = geocode_df.loc[geocode_df["Alternate Names"].str.contains(search_string, na = False)].sort_values("Population")["Country Code"].values[0]
+                    country_code = geocode_df.loc[geocode_df["alternate_name_codes"].str.contains(search_string, na = False)]["Country Code"].values[0]
                     geocoded_dict[city].append(country_code)
                     success_counter += 1
             # Main coordinate finder
             if len(geocoded_dict[city]) == 1:
-                    coordinates = geocode_df.loc[geocode_df["name_code"] == city]["Coordinates"].values[0].split(", ")
-                    geocoded_dict[city].append(coordinates[0])
-                    geocoded_dict[city].append(coordinates[1])
-                    country_code = geocode_df.loc[geocode_df["name_code"] == city]["Country Code"].values[0]
-                    geocoded_dict[city].append(country_code)
-                    success_counter += 1
+                coordinates = geocode_df.loc[geocode_df["name_code"] == city]["Coordinates"].values[0].split(", ")
+                geocoded_dict[city].append(coordinates[0])
+                geocoded_dict[city].append(coordinates[1])
+                country_code = geocode_df.loc[geocode_df["name_code"] == city]["Country Code"].values[0]
+                geocoded_dict[city].append(country_code)
+                success_counter += 1
         # Otherwise check in alternate names
-        elif geocode_df["Alternate Names"].str.contains(search_string, na = False).any():
-            coordinates = geocode_df.loc[geocode_df["Alternate Names"].str.contains(search_string, na = False)].sort_values("Population")["Coordinates"].values[0].split(", ")
+        elif geocode_df["alternate_name_codes"].str.contains(search_string, na = False).any():
+            coordinates = geocode_df.loc[geocode_df["alternate_name_codes"].str.contains(search_string, na = False)]["Coordinates"].values[0].split(", ")
             geocoded_dict[city].append(coordinates[0])
             geocoded_dict[city].append(coordinates[1])
-            country_code = geocode_df.loc[geocode_df["Alternate Names"].str.contains(search_string, na = False)].sort_values("Population")["Country Code"].values[0]
+            country_code = geocode_df.loc[geocode_df["alternate_name_codes"].str.contains(search_string, na = False)]["Country Code"].values[0]
             geocoded_dict[city].append(country_code)
             success_counter += 1
         print("Done:", str((city_counter / len(geocoded_dict.keys()))*100)[:5], "% - Success:", str((success_counter / city_counter)*100)[:5], "%")
